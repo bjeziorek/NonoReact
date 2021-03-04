@@ -1,38 +1,33 @@
 import './NonoGame.css';
 
 function Field(props) {
+  let x = '';
+  if (props.value) {
+    x = 'x';
+  }
   return (
-    <div onClick={()=>{console.log(props.value)}} className={props.classN}></div>
+    <div onClick={() => { console.log(props.value) }} className={props.classN}>{x}</div>
   );
 }
 
-function Tip(props){
+function Tip(props) {
   return (
     <div className={props.classN}>{props.value}</div>
   );
 }
 
-function Board() {
-  
-  const emptyBoard = generateEmptyBoard(10);
-  const initedBoard = emptyBoard.map((row) => {
-    return row.map(() => {
-      return randomBool();
-    }
-    );
-  });
+function Board(props) {
+  const initedBoard = props.currentGame;
   return (
     <div>
       {
-        initedBoard.map((item, index) => {
-          console.log(item)
+        initedBoard.map((item, rowId) => {
           return (
-            <div className="flex">
+            <div className="row">
               {
                 item.map((subitem, index2) => {
-                  console.log(subitem)
                   return (
-                    <Field classN="field" value={subitem} key={index2}></Field>
+                    <Field classN="field" fieldId={[rowId, index2]} value={subitem} key={index2}></Field>
                   );
                 })
               }
@@ -48,7 +43,7 @@ function Board() {
         initedBoard.map((item, index) => {
           console.log(item)
           return (
-            <div className="flex">
+            <div className="row">
               {
                 item.map((subitem, index2) => {
                   console.log(subitem)
@@ -73,20 +68,41 @@ function Toolbar() {
   );
 }
 
-function TipsLeft() {
-  const emptyBoard = generateEmptyBoard(10);
-  const initedTipsLeft = emptyBoard.map((row) => {
-    return row.map(() => {
-      return 0;
+function TipsLeft(props) {
+  const currentGame = props.currentGame;
+  const emptyBoard = generateEmptyBoard(10, 5);
+  const initedTipsLeft = emptyBoard.map((row, rowIndex) => {
+    let sum = 0;
+    const resultArray = [];
+    for (let i = 0; i < currentGame.length; i++) {
+      if (currentGame[rowIndex][i]) {
+        sum++;
+        if (i === currentGame.length - 1) {
+          resultArray.push(sum);
+        }
+      } else {
+        resultArray.push(sum);
+        sum = 0;
+      }
     }
-    );
+    let idx = 0;
+    while (idx > -1) {
+      idx = resultArray.indexOf(0);
+      if (idx > -1) {
+        resultArray.splice(idx, 1);
+      }
+    }
+    for (let i = resultArray.length; i < 5; i++) {
+      resultArray.unshift('');
+    }
+    return resultArray;
   });
   return (
     <div>
       {
-        initedTipsLeft.map((item, index) => {
+        initedTipsLeft.map((item) => {
           return (
-            <div className="flex">
+            <div className="row">
               {
                 item.map((subitem, index2) => {
                   return (
@@ -98,29 +114,53 @@ function TipsLeft() {
           )
         })
       }
-    
+
     </div>
   );
 }
 
-function TipsUpper() {
-  const emptyBoard = generateEmptyBoard(10);
-  const initedTipsUpper = emptyBoard.map((row) => {
-    return row.map(() => {
-      return 0;
+function TipsUpper(props) {
+  const currentGame = props.currentGame;
+  const emptyBoard = generateEmptyBoard(5, 10);
+  const initedTipsUpper = emptyBoard[0].map((row, rowIndex) => {
+    let sum = 0;
+    const resultArray = [];
+    for (let i = 0; i < currentGame.length; i++) {
+      if (currentGame[i][rowIndex]) {
+        sum++;
+        if (i === currentGame.length - 1) {
+          resultArray.push(sum);
+        }
+      } else {
+        resultArray.push(sum);
+        sum = 0;
+      }
     }
-    );
+    let idx = 0;
+    while (idx > -1) {
+      idx = resultArray.indexOf(0);
+      if (idx > -1) {
+        resultArray.splice(idx, 1);
+      }
+    }
+    for (let i = resultArray.length; i < 5; i++) {
+      resultArray.unshift('');
+    }
+    return resultArray;
   });
+  initedTipsUpper.reverse();
+  console.log('x',initedTipsUpper)
   return (
     <div className="right">
+      <div className="rotated">
       {
-        initedTipsUpper.map((item, index) => {
+        initedTipsUpper.map((item) => {
           return (
-            <div className="flex">
+            <div className="row">
               {
                 item.map((subitem, index2) => {
                   return (
-                    <Tip classN="tip-field" value={subitem} key={index2}></Tip>
+                    <Tip classN="tip-field innerRotated" value={subitem} key={index2}></Tip>
                   );
                 })
               }
@@ -128,23 +168,30 @@ function TipsUpper() {
           )
         })
       }
+      </div>
     </div>
   );
 }
 
 function NonoGame() {
+  const emptyBoard = generateEmptyBoard(10, 10);
+  const initedBoard = emptyBoard.map((row) => {
+    return row.map(() => {
+      return randomBool();
+    }
+    );
+  });
   return ( // tu musi to być wpakowane w div, bo moe być tylko jeden parent element
     <div className="game">
-      <div className="game-container-row right">
-        <TipsUpper></TipsUpper>
+      <div className="row right">
+        <TipsUpper currentGame={initedBoard}></TipsUpper>
       </div>
-      <div className="game-container-row">
-        <TipsLeft></TipsLeft>
-        <Board></Board>
+      <div className="row">
+        <TipsLeft currentGame={initedBoard}></TipsLeft>
+        <Board currentGame={initedBoard}></Board>
       </div>
       <div>
         <Toolbar></Toolbar>
-        <Field></Field>
       </div>
     </div>
   );
@@ -152,8 +199,8 @@ function NonoGame() {
 
 export default NonoGame;
 
-function generateEmptyBoard(size){
-  return Array(size).fill(Array(size).fill());
+function generateEmptyBoard(sizeX, sizeY) {
+  return Array(sizeX).fill(Array(sizeY).fill());
 }
 function randomBool() {
   return (Math.random() < 0.5);
