@@ -1,0 +1,56 @@
+body {
+  font: 14px "Century Gothic", Futura, sans-serif;
+  margin: 20px;
+  background-color: aqua;
+}
+
+.game{
+    width: 530px;
+    height: 530px;
+}
+
+.game-container-row{
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.right{
+    flex-direction: column;
+    align-self: flex-end;
+}
+
+.tip-field{
+    color:black;
+    background-color: aqua;
+    border: 1px solid aqua;
+    width: 25px;
+    height: 25px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.field{
+    color:darkorange;
+    background-color: deeppink;
+    border: 1px solid black;
+    width: 25px;
+    height: 25px;
+    text-align: center;
+    overflow: hidden;
+}
+.flex{
+    display: flex;
+    flex-wrap: nowrap;
+}
+.goodClick {
+  background-color: black;
+}
+.badClick {
+  background-color: red;
+}
+.badClick2 {
+  background-color: rgb(192,  107,  107);
+}
+.blue {
+  background-color: blue;
+}
