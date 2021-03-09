@@ -49,6 +49,15 @@ body {
     text-align: center;
     overflow: hidden;
 }
+.field2{
+    color:black;
+    background-color: deeppink;
+    border: 1px solid black;
+    width: 25px;
+    height: 25px;
+    text-align: center;
+    overflow: hidden;
+}
 .flex{
     display: flex;
     flex-wrap: nowrap;
@@ -56,9 +65,16 @@ body {
 .goodClick {
   background-color: black;
 }
+.goodClickRevealed{
+    background-color: rgb(66, 66, 66);
+}
 .badClick {
   background-color: red;
 }
+.badClickRevealed{
+    background-color: rgb(255, 126, 126);
+}
+
 .badClick2 {
   background-color: rgb(192,  107,  107);
 }

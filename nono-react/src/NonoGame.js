@@ -1,12 +1,55 @@
+import { useState } from 'react';
 import './NonoGame.css';
 
+const LIVES_INIT = 3;
+
 function Field(props) {
+  const [currentClass, setCurrentClass] = useState(props.value.class);
+  const [currentFilled, setCurrentFilled] = useState(props.value.isFilled);
+  const [currentUncovered, setCurrentUncovered] = useState(false)
+
+  const [gameState, setGameState] = useState(props.gameState);
+
+  //console.log('end: ',props.endGameSignal);
+
+ /* if (props.endGameSignal.state) {
+    if (currentClass === '') {
+      console.log(currentUncovered, props.value.isUncovered, currentFilled)
+      if (props.value.isUncovered) {
+        setCurrentClass(currentFilled ? 'field goodClick' : 'field badClick');
+      } else {
+        setCurrentClass(currentFilled ? 'field goodClickRevealed' : 'field badClickRevealed');
+      }
+    }
+  }*/
+
+
+
   let x = '';
-  if (props.value) {
+  if (props.value.isFilled) {
     x = 'x';
   }
+
+
+  //
+
+
+  const handleClick = function () {
+    setCurrentUncovered(true)
+    if (props.gameState !== 'gameover') {
+      if (props.value.isFilled) {
+        props.changeLives(0);
+      } else {
+        props.changeLives(-1);
+      }
+      props.clicked(props.fieldId[0], props.fieldId[1]);
+
+    } else {
+
+    }
+  }
   return (
-    <div onClick={() => { console.log(props.value) }} className={props.classN}>{x}</div>
+    <div onClick={handleClick} className={props.classN + " " + props.value.class + " " + currentClass}>{x}</div>
   );
 }
 
@@ -17,7 +60,92 @@ function Tip(props) {
 }
 
 function Board(props) {
-  const initedBoard = props.currentGame;
+  const [initedBoard, setInitedBoard] = useState(props.currentGame);
+  const [endGameSignal, setEndGameSignal] = useState({ state: false, board: initedBoard });
+
+  const checkIfWin = function () {
+    for (let i = 0; i < initedBoard.length; i++) {
+      for (let j = 0; j < initedBoard[i].length; j++) {
+        if (initedBoard[i][j].isFilled) { //if is filled
+          if (!initedBoard[i][j].isUncovered) { //and this filled is not uncovered yet
+            return false; //it meant that it's not win state
+          }
+        }
+      }
+    }
+    return true; //if didn't return false it means it's win state
+  }
+
+  const checkIfLose = function () {
+    let countBadClick = 0;
+    for (let i = 0; i < initedBoard.length; i++) {
+      for (let j = 0; j < initedBoard[i].length; j++) {
+        if (!initedBoard[i][j].isFilled) { //if is empty
+          if (initedBoard[i][j].isUncovered) { //and this empty is uncovered
+            countBadClick++;
+            if (countBadClick >= LIVES_INIT) {
+              return true; //it meant that it's gameover
+            }
+          }
+        }
+      }
+    }
+    return false; //if didn't return true it means it's still in game state or won
+  }
+
+  const clickOnField = function (x, y) {
+    let temp = initedBoard;
+    temp[x][y].isUncovered = true;
+    if (checkIfWin() || checkIfLose()) {
+      if (temp[x][y].isUncovered) {
+        temp[x][y].class = temp[x][y].isFilled ? 'goodClick' : 'badClick';
+      } else {
+        temp[x][y].class = temp[x][y].isFilled ? 'goodClickRevealed' : 'badClickRevealed';
+      }
+    } else {
+      temp[x][y].class = temp[x][y].isFilled ? 'goodClick' : 'badClick';
+    }
+    setInitedBoard(temp);
+    if (checkIfWin()) {
+      props.setResult('You won!');
+      generateEndOfGameBoard(temp);
+    }
+    if (checkIfLose()) {
+      props.setResult('Gameover');
+      generateEndOfGameBoard(temp);
+    } 
+  }
+
+  function generateEndOfGameBoard(temp) {
+    for (let i = 0; i < initedBoard.length; i++) {
+      for (let j = 0; j < initedBoard[i].length; j++) {
+        if (initedBoard[i][j].isFilled) { //if is filled
+          if (initedBoard[i][j].isUncovered) { //and this filled is not uncovered yet
+            temp[i][j].class = 'goodClick';
+          } else {
+            temp[i][j].class = 'goodClickRevealed';
+          }
+        }
+        if (!initedBoard[i][j].isFilled) { //if is filled
+          if (initedBoard[i][j].isUncovered) { //and this filled is not uncovered yet
+            temp[i][j].class = 'badClick';
+          } else {
+            temp[i][j].class = 'badClickRevealed';
+          }
+        }
+      }
+    }
+    setInitedBoard(temp);
+  }
+
+  const changeLives = function (value) {
+    props.upperChangeLives(value);
+  }
+
+  const updateClass = function (x, y) {
+    return initedBoard[x][y].class;
+  }
+
   return (
     <div>
       {
@@ -27,7 +155,7 @@ function Board(props) {
               {
                 item.map((subitem, index2) => {
                   return (
-                    <Field classN="field" fieldId={[rowId, index2]} value={subitem} key={index2}></Field>
+                    <Field classN="field" endGameSignal={endGameSignal} clicked={clickOnField} updateClass={updateClass} changeLives={changeLives} gameState={props.gameState} fieldId={[rowId, index2]} value={subitem} key={index2} board={initedBoard}></Field>
                   );
                 })
               }
@@ -37,34 +165,52 @@ function Board(props) {
       }
     </div>
   );
-  /*return (
-    <div className="mainBoard">
-      {
-        initedBoard.map((item, index) => {
-          console.log(item)
-          return (
-            <div className="row">
-              {
-                item.map((subitem, index2) => {
-                  console.log(subitem)
-                  return (
-                    <div className="field" key={index2}>
-                      {subitem.toString()}
-                    </div>
-                  );
-                })
-              }
-            </div>
-          )
-        })
-      }
-    </div>
-  );*/
 }
 
-function Toolbar() {
+function Lives(props) {
+
+  function initHearts() {
+    let hearts = '';
+    for (let i = 0; i < props.heartNumber; i++) {
+      hearts += '❤';
+    }
+    return hearts;
+  }
+
   return (
-    <div>toolbar</div>
+    <div>
+      {
+        initHearts()
+      }
+    </div>
+  );
+}
+function GameResults(props) {
+  return (
+    <div>
+      {props.result}
+    </div>
+  );
+}
+
+function StartGameButton(props) {
+  let restartGameClick = function () {
+
+  }
+  return (
+    <button onClick={restartGameClick}>Restart Game</button>
+  );
+}
+
+function Toolbar(props) {
+  let restartGameClick = function () {
+
+  }
+  return (
+    <div>
+      <GameResults result={props.result}></GameResults>
+      <Lives heartNumber={props.hearts}></Lives>
+    </div>
   );
 }
 
@@ -75,7 +221,7 @@ function TipsLeft(props) {
     let sum = 0;
     const resultArray = [];
     for (let i = 0; i < currentGame.length; i++) {
-      if (currentGame[rowIndex][i]) {
+      if (currentGame[rowIndex][i].isFilled) {
         sum++;
         if (i === currentGame.length - 1) {
           resultArray.push(sum);
@@ -126,7 +272,7 @@ function TipsUpper(props) {
     let sum = 0;
     const resultArray = [];
     for (let i = 0; i < currentGame.length; i++) {
-      if (currentGame[i][rowIndex]) {
+      if (currentGame[i][rowIndex].isFilled) {
         sum++;
         if (i === currentGame.length - 1) {
           resultArray.push(sum);
@@ -149,38 +295,70 @@ function TipsUpper(props) {
     return resultArray;
   });
   initedTipsUpper.reverse();
-  console.log('x',initedTipsUpper)
   return (
     <div className="right">
       <div className="rotated">
-      {
-        initedTipsUpper.map((item) => {
-          return (
-            <div className="row">
-              {
-                item.map((subitem, index2) => {
-                  return (
-                    <Tip classN="tip-field innerRotated" value={subitem} key={index2}></Tip>
-                  );
-                })
-              }
-            </div>
-          )
-        })
-      }
+        {
+          initedTipsUpper.map((item) => {
+            return (
+              <div className="row">
+                {
+                  item.map((subitem, index2) => {
+                    return (
+                      <Tip classN="tip-field innerRotated" value={subitem} key={index2}></Tip>
+                    );
+                  })
+                }
+              </div>
+            )
+          })
+        }
       </div>
     </div>
   );
 }
 
-function NonoGame() {
+function NonoGame(props) {
+  const [result, setResult] = useState("game started");
   const emptyBoard = generateEmptyBoard(10, 10);
-  const initedBoard = emptyBoard.map((row) => {
-    return row.map(() => {
-      return randomBool();
-    }
+  const initBoard = function () {
+    return (
+      emptyBoard.map((row) => {
+        return row.map(() => {
+          return ({
+            isFilled: randomBool(),
+            isUncovered: false,
+            class: ''
+          });
+        }
+        )
+      })
     );
+  }
+  const [currentNumberOfHearts, setHearts] = useState(LIVES_INIT);
+  const [stateOfGame, setStateOfGame] = useState('start');
+  const [initedBoard, setInitedBoard] = useState(() => {
+    return initBoard();
   });
+
+  let restartGameClick = function () {
+    setStateOfGame('start');
+    setInitedBoard(initBoard());
+    setHearts(LIVES_INIT)
+    setResult('game started');
+  }
+
+  const handleLives = function (value) {
+    if (value === 0) {
+
+    } else {
+
+      setHearts(currentNumberOfHearts + value);
+      if (currentNumberOfHearts === 1) {
+        setStateOfGame('gameover');
+      }
+    }
+  }
   return ( // tu musi to być wpakowane w div, bo moe być tylko jeden parent element
     <div className="game">
       <div className="row right">
@@ -188,12 +366,11 @@ function NonoGame() {
       </div>
       <div className="row">
         <TipsLeft currentGame={initedBoard}></TipsLeft>
-        <Board currentGame={initedBoard}></Board>
-      </div>
-      <div>
-        <Toolbar></Toolbar>
-      </div>
+        <Board key={initedBoard,stateOfGame} setResult={setResult} currentGame={initedBoard} gameState={stateOfGame} upperChangeLives={handleLives}></Board>
+      </div><Toolbar result={result} hearts={currentNumberOfHearts}></Toolbar>
+      <button onClick={restartGameClick}>restart</button>
     </div>
+
   );
 }
 
