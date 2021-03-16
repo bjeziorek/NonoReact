@@ -287,7 +287,7 @@ function TipsUpper(props) {
                 {
                   item.map((subitem, index2) => {
                     return (
-                      <Tip classN="tip-field innerRotated" value={subitem} key={index2}></Tip>
+                      <Tip classN=" tip-field innerRotated" value={subitem} key={index2}></Tip>
                     );
                   })
                 }
@@ -296,6 +296,21 @@ function TipsUpper(props) {
           })
         }
       </div>
+    </div>
+  );
+}
+
+function Theme(props){
+  return(
+    <div>
+      <details>
+      <summary>Themes</summary>
+      <button className='theme1' onClick='setTheme(1)'>Theme1</button>
+      <button className='theme2' onClick='setTheme(2)'>Theme1</button>
+      <button className='theme3' onClick='setTheme(3)'>Theme1</button>
+      <button className='theme4' onClick='setTheme(4)'>Theme1</button>
+      <button className='theme5' onClick='setTheme(5)'>Theme1</button>
+      </details>
     </div>
   );
 }
@@ -345,7 +360,7 @@ function NonoGame(props) {
       }
     }
   }
-  return ( // tu musi to być wpakowane w div, bo moe być tylko jeden parent element
+  return ( // tu musi to być wpakowane w div, bo moze być tylko jeden parent element
     <div className="game">
       <div className="row right">
         <TipsUpper currentGame={initedBoard}></TipsUpper>
@@ -355,6 +370,7 @@ function NonoGame(props) {
         <Board key={initedBoard, stateOfGame} setResult={setResult} currentGame={initedBoard} gameState={stateOfGame} upperChangeLives={handleLives}></Board>
       </div><Toolbar result={result} hearts={currentNumberOfHearts}></Toolbar>
       <button className="blue-pink" onClick={restartGameClick}>restart</button>
+      <Theme></Theme>
     </div>
 
   );
