@@ -10,29 +10,10 @@ function Field(props) {
 
   const [gameState, setGameState] = useState(props.gameState);
 
-  //console.log('end: ',props.endGameSignal);
-
- /* if (props.endGameSignal.state) {
-    if (currentClass === '') {
-      console.log(currentUncovered, props.value.isUncovered, currentFilled)
-      if (props.value.isUncovered) {
-        setCurrentClass(currentFilled ? 'field goodClick' : 'field badClick');
-      } else {
-        setCurrentClass(currentFilled ? 'field goodClickRevealed' : 'field badClickRevealed');
-      }
-    }
-  }*/
-
-
-
   let x = '';
   if (props.value.isFilled) {
     x = 'x';
   }
-
-
-  //
-
 
   const handleClick = function () {
     setCurrentUncovered(true)
@@ -48,8 +29,9 @@ function Field(props) {
 
     }
   }
+  // console.log('class:',props.value.class,props.value.updateClass);
   return (
-    <div onClick={handleClick} className={props.classN + " " + props.value.class + " " + currentClass}>{x}</div>
+    <div key={props.value.class} onClick={handleClick} className={props.classN + " " + props.value.class + " " + currentClass}>{x}</div>
   );
 }
 
@@ -61,7 +43,6 @@ function Tip(props) {
 
 function Board(props) {
   const [initedBoard, setInitedBoard] = useState(props.currentGame);
-  const [endGameSignal, setEndGameSignal] = useState({ state: false, board: initedBoard });
 
   const checkIfWin = function () {
     for (let i = 0; i < initedBoard.length; i++) {
@@ -113,7 +94,7 @@ function Board(props) {
     if (checkIfLose()) {
       props.setResult('Gameover');
       generateEndOfGameBoard(temp);
-    } 
+    }
   }
 
   function generateEndOfGameBoard(temp) {
@@ -154,8 +135,9 @@ function Board(props) {
             <div className="row">
               {
                 item.map((subitem, index2) => {
+                  console.log(subitem, index2);
                   return (
-                    <Field classN="field" endGameSignal={endGameSignal} clicked={clickOnField} updateClass={updateClass} changeLives={changeLives} gameState={props.gameState} fieldId={[rowId, index2]} value={subitem} key={index2} board={initedBoard}></Field>
+                    <Field classN="field" clicked={clickOnField} updateClass={updateClass} changeLives={changeLives} gameState={props.gameState} fieldId={[rowId, index2]} value={subitem} key={{ subitem, index2 }} board={initedBoard}></Field>
                   );
                 })
               }
@@ -342,7 +324,11 @@ function NonoGame(props) {
   });
 
   let restartGameClick = function () {
-    setStateOfGame('start');
+    if (stateOfGame === 'start') {
+      setStateOfGame('start2');
+    } else {
+      setStateOfGame('start');
+    }
     setInitedBoard(initBoard());
     setHearts(LIVES_INIT)
     setResult('game started');
@@ -366,9 +352,9 @@ function NonoGame(props) {
       </div>
       <div className="row">
         <TipsLeft currentGame={initedBoard}></TipsLeft>
-        <Board key={initedBoard,stateOfGame} setResult={setResult} currentGame={initedBoard} gameState={stateOfGame} upperChangeLives={handleLives}></Board>
+        <Board key={initedBoard, stateOfGame} setResult={setResult} currentGame={initedBoard} gameState={stateOfGame} upperChangeLives={handleLives}></Board>
       </div><Toolbar result={result} hearts={currentNumberOfHearts}></Toolbar>
-      <button onClick={restartGameClick}>restart</button>
+      <button className="blue-pink" onClick={restartGameClick}>restart</button>
     </div>
 
   );

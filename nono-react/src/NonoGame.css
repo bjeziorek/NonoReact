@@ -81,3 +81,20 @@ body {
 .blue {
   background-color: blue;
 }
+
+.blue-pink{
+    margin:10px;
+    padding:6px;
+    background-color: pink;
+    color:deeppink;
+    border-radius: 3px;
+    border: 1px solid deeppink;
+}
+.blue-pink:hover{
+    margin:10px;
+    padding:6px;
+    background-color: deeppink;
+    color:pink;
+    border-radius: 5px;
+    border: 1px solid pink;
+}
